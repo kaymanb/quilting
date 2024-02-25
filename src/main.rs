@@ -1,3 +1,6 @@
+use quilting::patchwork::Board;
+
 fn main() {
-    println!("Hello, world!");
+    let board = Board::default();
+    println!("{board}")
 }
