@@ -2,7 +2,7 @@ use geo::{polygon, Polygon};
 
 #[derive(Debug)]
 pub struct Patch {
-    geometry: Polygon,
+    pub(crate) geometry: Polygon,
 }
 
 impl Default for Patch {
