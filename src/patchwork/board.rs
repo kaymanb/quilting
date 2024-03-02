@@ -6,11 +6,71 @@ use geo::{coord, point, Contains, Point, Rect};
 
 use crate::patchwork::Patch;
 
+#[derive(Debug)]
+pub struct Board {
+    height: usize,
+    width: usize,
+    geometry: Rect<usize>,
+    placements: HashMap<Point<u8>, Patch>,
+}
+
+impl Board {
+    pub fn place(&mut self, point: Point<u8>, patch: Patch) {
+        self.placements.insert(point, patch);
+    }
+}
+
+impl Default for Board {
+    fn default() -> Self {
+        let (width, height) = (9, 9);
+        Self {
+            width,
+            height,
+            geometry: Rect::new(coord! { x: 0, y: 0}, coord! { x: width, y: height}),
+            placements: HashMap::new(),
+        }
+    }
+}
+
+impl fmt::Display for Board {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut rows = Vec::new();
+        for y in (0..self.height).rev() {
+            let mut row = Vec::new();
+            for x in 0..self.width {
+                // Sample is offset by 0.5 to avoid boundary issues
+                let mut found = false;
+                let sample = point! { x: (x as f64 + 0.5), y: (y as f64+ 0.5) };
+                for (point, patch) in &self.placements {
+                    if patch.relative_geometry(point).contains(&sample) {
+                        found = true;
+                        row.push(patch.pattern());
+                        break;
+                    }
+                }
+                if !found {
+                    row.push(" ".into());
+                }
+            }
+            rows.push(row);
+        }
+
+        let mut viewer = Viewer::new(f);
+        viewer.top(self.width)?;
+        for row in rows.into_iter() {
+            viewer.row(row)?;
+        }
+        viewer.bottom(self.width)
+    }
+}
+
 struct Viewer<'a, 'b> {
     out: &'a mut fmt::Formatter<'b>,
 }
 
 impl<'a, 'b> Viewer<'a, 'b> {
+    // Due to character dimensions, a board will render more like
+    // a square if we "double" the width.
     const WIDTH_MULTIPLE: usize = 2;
 
     const VERTICAL: &'static str = "│";
@@ -54,63 +114,5 @@ impl<'a, 'b> Viewer<'a, 'b> {
 
     fn colorize(string: String) -> ColoredString {
         string.bright_black()
-    }
-}
-
-#[derive(Debug)]
-pub struct Board {
-    height: usize,
-    width: usize,
-    geometry: Rect<usize>,
-    placements: HashMap<Point<usize>, Patch>,
-}
-
-impl Board {
-    pub fn place(&mut self, point: Point<usize>, patch: Patch) {
-        self.placements.insert(point, patch);
-    }
-}
-
-impl Default for Board {
-    fn default() -> Self {
-        let (width, height) = (9, 9);
-        Self {
-            width,
-            height,
-            geometry: Rect::new(coord! { x: 0, y: 0}, coord! { x: width, y: height}),
-            placements: HashMap::new(),
-        }
-    }
-}
-
-impl fmt::Display for Board {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut rows = Vec::new();
-        for y in (0..self.height).rev() {
-            let mut row = Vec::new();
-            for x in 0..self.width {
-                // Sample is offset by 0.5 to avoid boundary issues
-                let mut found = false;
-                let sample = point! { x: (x as f64 + 0.5), y: (y as f64+ 0.5) };
-                for patch in self.placements.values() {
-                    if patch.geometry.contains(&sample) {
-                        found = true;
-                        row.push("█".blue());
-                        break;
-                    }
-                }
-                if !found {
-                    row.push(" ".into());
-                }
-            }
-            rows.push(row);
-        }
-
-        let mut viewer = Viewer::new(f);
-        viewer.top(self.width)?;
-        for row in rows.into_iter() {
-            viewer.row(row)?;
-        }
-        viewer.bottom(self.width)
     }
 }
