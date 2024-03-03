@@ -16,6 +16,8 @@ pub enum Shape {
     Step,
     LongT,
     LongI,
+    HalfCross,
+    StripedStep,
 }
 
 impl Shape {
@@ -35,6 +37,8 @@ impl Shape {
             Shape::Step => 1,
             Shape::LongT => 2,
             Shape::LongI => 1,
+            Shape::HalfCross => 1,
+            Shape::StripedStep => 3,
         }
     }
 
@@ -180,6 +184,32 @@ impl Shape {
                 (x: 1.0, y: 0.0),
                 (x: 0.0, y: 0.0),
             ],
+            Shape::HalfCross => polygon![
+                (x: 0.0, y: 0.0),
+                (x: 0.0, y: 2.0),
+                (x: -1.0, y: 2.0),
+                (x: -1.0, y: 3.0),
+                (x: 0.0, y: 3.0),
+                (x: 0.0, y: 4.0),
+                (x: 1.0, y: 4.0),
+                (x: 1.0, y: 3.0),
+                (x: 2.0, y: 3.0),
+                (x: 2.0, y: 2.0),
+                (x: 1.0, y: 2.0),
+                (x: 1.0, y: 0.0),
+                (x: 0.0, y: 0.0),
+            ],
+            Shape::StripedStep => polygon![
+                (x: 0.0, y: 0.0),
+                (x: 0.0, y: 2.0),
+                (x: 1.0, y: 2.0),
+                (x: 1.0, y: 3.0),
+                (x: 2.0, y: 3.0),
+                (x: 2.0, y: 1.0),
+                (x: 1.0, y: 1.0),
+                (x: 1.0, y: 0.0),
+                (x: 0.0, y: 0.0),
+            ],
         }
     }
 
@@ -199,6 +229,8 @@ impl Shape {
             Shape::Step => "".red().on_magenta(),
             Shape::LongT => "x".green().on_truecolor(105, 210, 205),
             Shape::LongI => "".bright_black().on_truecolor(35, 60, 50),
+            Shape::HalfCross => "".bright_black().on_truecolor(128, 128, 0),
+            Shape::StripedStep => "󰞱".truecolor(157, 0, 0).on_bright_white(),
         }
     }
 }
