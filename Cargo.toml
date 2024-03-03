@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 colored = "2.1.0"
 geo = "0.28.0"
+rand = "0.8.5"

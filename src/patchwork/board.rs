@@ -23,7 +23,7 @@ impl fmt::Display for PlacementError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Board {
     height: usize,
     width: usize,
@@ -32,7 +32,7 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn place(&mut self, point: Point<u8>, patch: Patch) -> Result<(), PlacementError> {
+    pub(crate) fn place(&mut self, point: Point<u8>, patch: Patch) -> Result<(), PlacementError> {
         let geometry = patch.relative_geometry(&point);
         let error = PlacementError {
             point,
@@ -54,6 +54,12 @@ impl Board {
         }
         self.placements.insert(point, patch);
         Ok(())
+    }
+
+    /// Returns a point and rotation for which a patch can be placed on the
+    /// board. Returns `None` if no valid placement is available.
+    pub(crate) fn fit(&self, patch: &Patch) -> Option<(Point, f64)> {
+        TODO: Here
     }
 }
 

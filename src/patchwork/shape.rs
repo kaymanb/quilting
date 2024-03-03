@@ -1,5 +1,7 @@
 use colored::{ColoredString, Colorize};
 use geo::{polygon, Polygon};
+use rand::distributions::{Distribution, Standard};
+use rand::Rng;
 
 #[derive(Copy, Clone, Debug)]
 pub enum Shape {
@@ -20,7 +22,30 @@ pub enum Shape {
     StripedStep,
 }
 
+impl Distribution<Shape> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Shape {
+        match rng.gen_range(0..Shape::NUM) {
+            0 => Shape::Start,
+            1 => Shape::T,
+            2 => Shape::L,
+            3 => Shape::I,
+            4 => Shape::U,
+            5 => Shape::SpaceInvader,
+            6 => Shape::LongPlus,
+            7 => Shape::FatPlus,
+            8 => Shape::LongL,
+            9 => Shape::BlueL,
+            10 => Shape::Step,
+            11 => Shape::LongT,
+            12 => Shape::LongI,
+            13 => Shape::HalfCross,
+            _ => Shape::StripedStep,
+        }
+    }
+}
+
 impl Shape {
+    pub(crate) const NUM: u8 = 15;
     /// Returns the number of buttons on a shape.
     fn buttons(&self) -> usize {
         match self {
