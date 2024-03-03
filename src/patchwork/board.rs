@@ -3,7 +3,7 @@ use std::{collections::HashMap, error::Error};
 
 use colored::{ColoredString, Colorize};
 use geo::dimensions::Dimensions;
-use geo::{point, BooleanOps, Contains, HasDimensions, Point};
+use geo::{coord, point, BooleanOps, Contains, HasDimensions, Point, Rect};
 
 use crate::patchwork::{Patch, Shape};
 
@@ -27,23 +27,29 @@ impl fmt::Display for PlacementError {
 pub struct Board {
     height: usize,
     width: usize,
+    geometry: Rect,
     placements: HashMap<Point<u8>, Patch>,
 }
 
 impl Board {
     pub fn place(&mut self, point: Point<u8>, patch: Patch) -> Result<(), PlacementError> {
         let geometry = patch.relative_geometry(&point);
+        let error = PlacementError {
+            point,
+            shape: patch.shape,
+        };
+
+        // Make sure that patch fits on the board.
+        if !self.geometry.contains(&geometry) {
+            return Err(error);
+        }
+
+        // Make sure that patch doesn't overlap with existing placements.
         for (epoint, epatch) in &self.placements {
             let existing_geometry = epatch.relative_geometry(epoint);
             let intersection = existing_geometry.intersection(&geometry);
-
-            // A placement only intefers with another if they intersect on
-            // more than just their boundary.
             if intersection.dimensions() == Dimensions::TwoDimensional {
-                return Err(PlacementError {
-                    point,
-                    shape: patch.shape,
-                });
+                return Err(error);
             }
         }
         self.placements.insert(point, patch);
@@ -57,6 +63,7 @@ impl Default for Board {
         Self {
             width,
             height,
+            geometry: Rect::new(coord! {x: 0., y: 0.}, coord! {x: 9., y: 9.}),
             placements: HashMap::new(),
         }
     }
